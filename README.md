@@ -1,2 +1,2 @@
-# javalearning
-自用java学习笔记
+# learning
+整理自己想看和准备学习的，电子书资源。
