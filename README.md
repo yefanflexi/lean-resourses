@@ -10,6 +10,7 @@ ol表示在线观看的。
     + [Java](#java)
     + [大数据](#大数据)
 
+- [随记](#随记)
 
 ## 电子书
 
@@ -32,3 +33,5 @@ ol表示在线观看的。
 + [Scala课堂(Twitter)【OL】](http://twitter.github.io/scala_school/zh_cn)
 + [Effective-Scala【OL】](http://twitter.github.io/effectivescala/index-cn.html)
 + [Spark快速大数据分析](bigdata/Spark快速大数据分析.pdf)
+
+## 随记
