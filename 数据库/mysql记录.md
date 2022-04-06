@@ -334,3 +334,270 @@ set(val1, val2, val3...)
         某个字段依赖于主键，而有其他字段依赖于该字段。这就是传递依赖。
         将一个实体信息的数据放在一个表内实现。
 ```
+### SELECT 
+
+```mysql
+/* SELECT */ ------------------
+SELECT [ALL|DISTINCT] select_expr FROM -> WHERE -> GROUP BY [合计函数] -> HAVING -> ORDER BY -> LIMIT
+a. select_expr
+    -- 可以用 * 表示所有字段。
+        select * from tb;
+    -- 可以使用表达式（计算公式、函数调用、字段也是个表达式）
+        select stu, 29+25, now() from tb;
+    -- 可以为每个列使用别名。适用于简化列标识，避免多个列标识符重复。
+        - 使用 as 关键字，也可省略 as.
+        select stu+10 as add10 from tb;
+b. FROM 子句
+    用于标识查询来源。
+    -- 可以为表起别名。使用as关键字。
+        SELECT * FROM tb1 AS tt, tb2 AS bb;
+    -- from子句后，可以同时出现多个表。
+        -- 多个表会横向叠加到一起，而数据会形成一个笛卡尔积。
+        SELECT * FROM tb1, tb2;
+    -- 向优化符提示如何选择索引
+        USE INDEX、IGNORE INDEX、FORCE INDEX
+        SELECT * FROM table1 USE INDEX (key1,key2) WHERE key1=1 AND key2=2 AND key3=3;
+        SELECT * FROM table1 IGNORE INDEX (key3) WHERE key1=1 AND key2=2 AND key3=3;
+c. WHERE 子句
+    -- 从from获得的数据源中进行筛选。
+    -- 整型1表示真，0表示假。
+    -- 表达式由运算符和运算数组成。
+        -- 运算数：变量（字段）、值、函数返回值
+        -- 运算符：
+            =, <=>, <>, !=, <=, <, >=, >, !, &&, ||,
+            in (not) null, (not) like, (not) in, (not) between and, is (not), and, or, not, xor
+            is/is not 加上ture/false/unknown，检验某个值的真假
+            <=>与<>功能相同，<=>可用于null比较
+d. GROUP BY 子句, 分组子句
+    GROUP BY 字段/别名 [排序方式]
+    分组后会进行排序。升序：ASC，降序：DESC
+    以下[合计函数]需配合 GROUP BY 使用：
+    count 返回不同的非NULL值数目  count(*)、count(字段)
+    sum 求和
+    max 求最大值
+    min 求最小值
+    avg 求平均值
+    group_concat 返回带有来自一个组的连接的非NULL值的字符串结果。组内字符串连接。
+e. HAVING 子句，条件子句
+    与 where 功能、用法相同，执行时机不同。
+    where 在开始时执行检测数据，对原数据进行过滤。
+    having 对筛选出的结果再次进行过滤。
+    having 字段必须是查询出来的，where 字段必须是数据表存在的。
+    where 不可以使用字段的别名，having 可以。因为执行WHERE代码时，可能尚未确定列值。
+    where 不可以使用合计函数。一般需用合计函数才会用 having
+    SQL标准要求HAVING必须引用GROUP BY子句中的列或用于合计函数中的列。
+f. ORDER BY 子句，排序子句
+    order by 排序字段/别名 排序方式 [,排序字段/别名 排序方式]...
+    升序：ASC，降序：DESC
+    支持多个字段的排序。
+g. LIMIT 子句，限制结果数量子句
+    仅对处理好的结果进行数量限制。将处理好的结果的看作是一个集合，按照记录出现的顺序，索引从0开始。
+    limit 起始位置, 获取条数
+    省略第一个参数，表示从索引0开始。limit 获取条数
+h. DISTINCT, ALL 选项
+    distinct 去除重复记录
+    默认为 all, 全部记录
+
+```
+
+###  UNION
+
+```mysql
+/* UNION */ ------------------
+    将多个select查询的结果组合成一个结果集合。
+    SELECT ... UNION [ALL|DISTINCT] SELECT ...
+    默认 DISTINCT 方式，即所有返回的行都是唯一的
+    建议，对每个SELECT查询加上小括号包裹。
+    ORDER BY 排序时，需加上 LIMIT 进行结合。
+    需要各select查询的字段数量一样。
+    每个select查询的字段列表(数量、类型)应一致，因为结果中的字段名以第一条select语句为准。
+```
+
+### 子查询
+
+```mysql
+/* 子查询 */ ------------------
+    - 子查询需用括号包裹。
+-- from型
+    from后要求是一个表，必须给子查询结果取个别名。
+    - 简化每个查询内的条件。
+    - from型需将结果生成一个临时表格，可用以原表的锁定的释放。
+    - 子查询返回一个表，表型子查询。
+    select * from (select * from tb where id>0) as subfrom where id>1;
+-- where型
+    - 子查询返回一个值，标量子查询。
+    - 不需要给子查询取别名。
+    - where子查询内的表，不能直接用以更新。
+    select * from tb where money = (select max(money) from tb);
+    -- 列子查询
+        如果子查询结果返回的是一列。
+        使用 in 或 not in 完成查询
+        exists 和 not exists 条件
+            如果子查询返回数据，则返回1或0。常用于判断条件。
+            select column1 from t1 where exists (select * from t2);
+    -- 行子查询
+        查询条件是一个行。
+        select * from t1 where (id, gender) in (select id, gender from t2);
+        行构造符：(col1, col2, ...) 或 ROW(col1, col2, ...)
+        行构造符通常用于与对能返回两个或两个以上列的子查询进行比较。
+    -- 特殊运算符
+    != all()    相当于 not in
+    = some()    相当于 in。any 是 some 的别名
+    != some()   不等同于 not in，不等于其中某一个。
+    all, some 可以配合其他运算符一起使用。
+```
+
+### 连接查询(join)
+
+```mysql
+/* 连接查询(join) */ ------------------
+    将多个表的字段进行连接，可以指定连接条件。
+-- 内连接(inner join)
+    - 默认就是内连接，可省略inner。
+    - 只有数据存在时才能发送连接。即连接结果不能出现空行。
+    on 表示连接条件。其条件表达式与where类似。也可以省略条件（表示条件永远为真）
+    也可用where表示连接条件。
+    还有 using, 但需字段名相同。 using(字段名)
+    -- 交叉连接 cross join
+        即，没有条件的内连接。
+        select * from tb1 cross join tb2;
+-- 外连接(outer join)
+    - 如果数据不存在，也会出现在连接结果中。
+    -- 左外连接 left join
+        如果数据不存在，左表记录会出现，而右表为null填充
+    -- 右外连接 right join
+        如果数据不存在，右表记录会出现，而左表为null填充
+-- 自然连接(natural join)
+    自动判断连接条件完成连接。
+    相当于省略了using，会自动查找相同字段名。
+    natural join
+    natural left join
+    natural right join
+select info.id, info.name, info.stu_num, extra_info.hobby, extra_info.sex from info, extra_info where info.stu_num = extra_info.stu_id;
+```
+
+### TRUNCATE 
+
+```mysql
+/* TRUNCATE */ ------------------
+TRUNCATE [TABLE] tbl_name
+清空数据
+删除重建表
+区别：
+1，truncate 是删除表再创建，delete 是逐条删除
+2，truncate 重置auto_increment的值。而delete不会
+3，truncate 不知道删除了几条，而delete知道。
+4，当被用于带分区的表时，truncate 会保留分区
+```
+
+### 备份与还原
+
+```mysql
+/* 备份与还原 */ ------------------
+备份，将数据的结构与表内数据保存起来。
+利用 mysqldump 指令完成。
+-- 导出
+mysqldump [options] db_name [tables]
+mysqldump [options] ---database DB1 [DB2 DB3...]
+mysqldump [options] --all--database
+1. 导出一张表
+　　mysqldump -u用户名 -p密码 库名 表名 > 文件名(D:/a.sql)
+2. 导出多张表
+　　mysqldump -u用户名 -p密码 库名 表1 表2 表3 > 文件名(D:/a.sql)
+3. 导出所有表
+　　mysqldump -u用户名 -p密码 库名 > 文件名(D:/a.sql)
+4. 导出一个库
+　　mysqldump -u用户名 -p密码 --lock-all-tables --database 库名 > 文件名(D:/a.sql)
+可以-w携带WHERE条件
+-- 导入
+1. 在登录mysql的情况下：
+　　source  备份文件
+2. 在不登录的情况下
+　　mysql -u用户名 -p密码 库名 < 备份文件
+```
+
+
+### 视图
+
+```mysql
+什么是视图：
+    视图是一个虚拟表，其内容由查询定义。同真实的表一样，视图包含一系列带有名称的列和行数据。但是，视图并不在数据库中以存储的数据值集形式存在。行和列数据来自由定义视图的查询所引用的表，并且在引用视图时动态生成。
+    视图具有表结构文件，但不存在数据文件。
+    对其中所引用的基础表来说，视图的作用类似于筛选。定义视图的筛选可以来自当前或其它数据库的一个或多个表，或者其它视图。通过视图进行查询没有任何限制，通过它们进行数据修改时的限制也很少。
+    视图是存储在数据库中的查询的sql语句，它主要出于两种原因：安全原因，视图可以隐藏一些数据，如：社会保险基金表，可以用视图只显示姓名，地址，而不显示社会保险号和工资数等，另一原因是可使复杂的查询易于理解和使用。
+-- 创建视图
+CREATE [OR REPLACE] [ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}] VIEW view_name [(column_list)] AS select_statement
+    - 视图名必须唯一，同时不能与表重名。
+    - 视图可以使用select语句查询到的列名，也可以自己指定相应的列名。
+    - 可以指定视图执行的算法，通过ALGORITHM指定。
+    - column_list如果存在，则数目必须等于SELECT语句检索的列数
+-- 查看结构
+    SHOW CREATE VIEW view_name
+-- 删除视图
+    - 删除视图后，数据依然存在。
+    - 可同时删除多个视图。
+    DROP VIEW [IF EXISTS] view_name ...
+-- 修改视图结构
+    - 一般不修改视图，因为不是所有的更新视图都会映射到表上。
+    ALTER VIEW view_name [(column_list)] AS select_statement
+-- 视图作用
+    1. 简化业务逻辑
+    2. 对客户端隐藏真实的表结构
+-- 视图算法(ALGORITHM)
+    MERGE       合并
+        将视图的查询语句，与外部查询需要先合并再执行！
+    TEMPTABLE   临时表
+        将视图执行完毕后，形成临时表，再做外层查询！
+    UNDEFINED   未定义(默认)，指的是MySQL自主去选择相应的算法。
+```
+
+### 事务(transaction) 
+
+```mysql
+事务是指逻辑上的一组操作，组成这组操作的各个单元，要不全成功要不全失败。
+    - 支持连续SQL的集体成功或集体撤销。
+    - 事务是数据库在数据完整性方面的一个功能。
+    - 需要利用 InnoDB 或 BDB 存储引擎，对自动提交的特性支持完成。
+    - InnoDB被称为事务安全型引擎。
+-- 事务开启
+    START TRANSACTION; 或者 BEGIN;
+    开启事务后，所有被执行的SQL语句均被认作当前事务内的SQL语句。
+-- 事务提交
+    COMMIT;
+-- 事务回滚
+    ROLLBACK;
+    如果部分操作发生问题，映射到事务开启前。
+-- 事务的特性
+    1. 原子性（Atomicity）
+        事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生。
+    2. 一致性（Consistency）
+        事务前后数据的完整性必须保持一致。
+        - 事务开始和结束时，外部数据一致
+        - 在整个事务过程中，操作是连续的
+    3. 隔离性（Isolation）
+        多个用户并发访问数据库时，一个用户的事务不能被其它用户的事务所干扰，多个并发事务之间的数据要相互隔离。
+    4. 持久性（Durability）
+        一个事务一旦被提交，它对数据库中的数据改变就是永久性的。
+-- 事务的实现
+    1. 要求是事务支持的表类型
+    2. 执行一组相关的操作前开启事务
+    3. 整组操作完成后，都成功，则提交；如果存在失败，选择回滚，则会回到事务开始的备份点。
+-- 事务的原理
+    利用InnoDB的自动提交(autocommit)特性完成。
+    普通的MySQL执行语句后，当前的数据提交操作均可被其他客户端可见。
+    而事务是暂时关闭“自动提交”机制，需要commit提交持久化数据操作。
+-- 注意
+    1. 数据定义语言（DDL）语句不能被回滚，比如创建或取消数据库的语句，和创建、取消或更改表或存储的子程序的语句。
+    2. 事务不能被嵌套
+-- 保存点
+    SAVEPOINT 保存点名称 -- 设置一个事务保存点
+    ROLLBACK TO SAVEPOINT 保存点名称 -- 回滚到保存点
+    RELEASE SAVEPOINT 保存点名称 -- 删除保存点
+-- InnoDB自动提交特性设置
+    SET autocommit = 0|1;   0表示关闭自动提交，1表示开启自动提交。
+    - 如果关闭了，那普通操作的结果对其他客户端也不可见，需要commit提交后才能持久化数据操作。
+    - 也可以关闭自动提交来开启事务。但与START TRANSACTION不同的是，
+        SET autocommit是永久改变服务器的设置，直到下次再次修改该设置。(针对当前连接)
+        而START TRANSACTION记录开启前的状态，而一旦事务提交或回滚后就需要再次开启事务。(针对当前事务)
+
+```
