@@ -14,6 +14,11 @@ ol表示在线观看的。
     + [数据库基础知识总结](#随记)
     + [mysql记录](#随记)
     + [spring](#随记)
+- [Java](#java)
+    + [并发](#java)
+- [笔试面试题](#笔试面试题)
+    + [单例模式](#笔试面试题)
+
 
 ## 电子书
 
@@ -22,6 +27,7 @@ ol表示在线观看的。
 + [Spring源码深度解析](Java/Spring源码深度解析.pdf)
 + [看透SpringMVC源代码与实践](Java/看透springMvc源代码分析与实践.pdf) 
 + [Java 设计模式](Java/设计模式(中文版).pdf)
++ [并发](java/并发/Java并发编程.md)
 
 ### Linux
 
@@ -42,3 +48,6 @@ ol表示在线观看的。
 + [mysql记录](数据库/mysql记录.md)
 + [spring](常用框架/spring/spring常用知识点.md)
 + [spring](常用框架/spring/spring-springboot常用注解.md)
+
+## 笔试面试题
++ [单例模式](笔试面试题/单例模式.md)
