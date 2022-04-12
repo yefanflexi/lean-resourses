@@ -643,13 +643,13 @@ Redis 可以通过 **`MULTI`，`EXEC`，`DISCARD` 和 `WATCH`** 等命令来实�
 ```bash
 > MULTI
 OK
-> SET USER "Guide哥"
+> SET USER "Guide"
 QUEUED
 > GET USER
 QUEUED
 > EXEC
 1) OK
-2) "Guide哥"
+2) "Guide"
 ```
 
 使用 [`MULTI`](https://redis.io/commands/multi) 命令后可以输入多个命令。Redis 不会立即执行这些命令，而是将它们放到队列，当调用了 [`EXEC`](https://redis.io/commands/exec) 命令将执行所有命令。
@@ -665,7 +665,7 @@ QUEUED
 ```bash
 > MULTI
 OK
-> SET USER "Guide哥"
+> SET USER "Guide"
 QUEUED
 > GET USER
 QUEUED
@@ -679,17 +679,17 @@ OK
 > WATCH USER
 OK
 > MULTI
-> SET USER "Guide哥"
+> SET USER "Guide"
 OK
 > GET USER
-Guide哥
+Guide
 > EXEC
 ERR EXEC without MULTI
 ```
 
 Redis 官网相关介绍 [https://redis.io/topics/transactions](https://redis.io/topics/transactions) 如下：
 
-![redis事务](./images/redis-all/redis事务.png)
+
 
 但是，Redis 的事务和我们平时理解的关系型数据库的事务不同。我们知道事务具有四大特性： **1. 原子性**，**2. 隔离性**，**3. 持久性**，**4. 一致性**。
 
@@ -702,7 +702,7 @@ Redis 官网相关介绍 [https://redis.io/topics/transactions](https://redis.io
 
 Redis 官网也解释了自己为啥不支持回滚。简单来说就是 Redis 开发者们觉得没必要支持回滚，这样更简单便捷并且性能更好。Redis 开发者觉得即使命令执行错误也应该在开发过程中就被发现而不是生产过程中。
 
-![redis roll back](./images/redis-all/redis-rollBack.png)
+
 
 你可以将 Redis 中的事务就理解为 ：**Redis 事务提供了一种将多个命令请求打包的功能。然后，再按顺序执行打包的所有命令，并且不会被中途打断。**
 
