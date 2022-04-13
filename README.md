@@ -13,6 +13,7 @@ ol表示在线观看的。
 - [随记](#随记)
     + [数据库基础知识总结](#随记)
     + [mysql记录](#随记)
+    + [redis](#随记)
     + [spring](#随记)
 - [Java](#java)
     + [并发](#java)
@@ -46,6 +47,7 @@ ol表示在线观看的。
 ## 随记
 + [数据库基础知识总结](数据库/数据库基础知识总结.md)
 + [mysql记录](数据库/mysql记录.md)
++ [redis](常用框架/redis/Redis知识点&面试题总结.md)
 + [spring](常用框架/spring/spring常用知识点.md)
 + [spring](常用框架/spring/spring-springboot常用注解.md)
 
