@@ -50,6 +50,7 @@ ol表示在线观看的。
 + [redis](常用框架/redis/Redis知识点&面试题总结.md)
 + [spring](常用框架/spring/spring常用知识点.md)
 + [spring](常用框架/spring/spring-springboot常用注解.md)
++ [设计模式](设计模式/设计模式总结.md)
 
 ## 笔试面试题
 + [单例模式](笔试面试题/单例模式.md)
